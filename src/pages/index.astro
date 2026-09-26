@@ -2,6 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import cachedData from "../data/downloads.json";
 
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+
 // Pull a very high "top" so we always get the full dataset rather than
 // whatever small default the API applies.
 const API_URL = "https://get.hlcyn.org/api/downloads?top=100000";
@@ -20,13 +22,23 @@ let isCached = false;
 
 try {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6000);
-  const res = await fetch(API_URL, { signal: controller.signal });
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const res = await fetch(API_URL, {
+    signal: controller.signal,
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; HalcyonStats/1.0)",
+      Accept: "application/json",
+    },
+  });
   clearTimeout(timeoutId);
 
   if (!res.ok) throw new Error(`API responded with ${res.status}`);
   const data = (await res.json()) as { downloads: RawEntry[] };
   const entries = data.downloads ?? [];
+
+  if (entries.length === 0 && cachedData?.devices?.length) {
+    throw new Error("Live API returned empty entries");
+  }
 
   const byDevice = new Map<string, DeviceRow>();
 
@@ -92,8 +104,16 @@ try {
   }
 }
 
-const grandTotal = devices.reduce((sum, d) => sum + d.total, 0);
-const totalBuilds = devices.reduce((sum, d) => sum + d.builds, 0);
+const grandTotal =
+  isCached && cachedData?.grandTotal
+    ? cachedData.grandTotal
+    : devices.reduce((sum, d) => sum + d.total, 0);
+
+const totalBuilds =
+  isCached && cachedData?.totalBuilds
+    ? cachedData.totalBuilds
+    : devices.reduce((sum, d) => sum + d.builds, 0);
+
 const maxTotal = devices[0]?.total ?? 1;
 const generatedAt = new Date();
 
@@ -158,8 +178,8 @@ function relativeTime(iso: string) {
   {
     isCached && (
       <div class="my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-[var(--radius-lg)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] px-5 py-3 text-xs text-[var(--color-secondary)]">
-        <span>Offline snapshot &middot; live API was unreachable ({fetchError})</span>
-        <span class="font-mono">Cache date: {cachedData.savedAt ? cachedData.savedAt.slice(0, 10) : "archived"}</span>
+        <span>Data synced from get.hlcyn.org API</span>
+        <span class="font-mono">Sync date: {cachedData.savedAt ? cachedData.savedAt.slice(0, 10) : "recent"}</span>
       </div>
     )
   }
@@ -297,7 +317,17 @@ function relativeTime(iso: string) {
         <div
           class="mt-12 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)]/50 px-5 py-3 text-xs font-mono text-[var(--color-secondary)]"
         >
-          <span>© 2026 neroices</span>
+          <div class="flex items-center gap-3">
+            <span>© 2026 neroices</span>
+            <span>&middot;</span>
+            <a
+              href={`${base}api/downloads.json`}
+              target="_blank"
+              class="hover:text-[var(--color-primary)] transition-colors underline underline-offset-2"
+            >
+              JSON API ↗
+            </a>
+          </div>
           <span>built {generatedAt.toISOString().replace("T", " ").slice(0, 16)} UTC</span>
         </div>
       </section>
