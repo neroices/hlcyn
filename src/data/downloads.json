@@ -1,0 +1,152 @@
+{
+  "savedAt": "2026-09-26T02:07:59.281Z",
+  "source": "https://get.hlcyn.org/api/downloads",
+  "grandTotal": 684,
+  "totalBuilds": 279,
+  "devices": [
+    {
+      "codename": "lime",
+      "total": 101,
+      "builds": 12,
+      "lastUpdated": "2026-09-25T19:45:02.111Z"
+    },
+    {
+      "codename": "tanzanite",
+      "total": 89,
+      "builds": 29,
+      "lastUpdated": "2026-09-25T19:52:18.004Z"
+    },
+    {
+      "codename": "citrus",
+      "total": 63,
+      "builds": 16,
+      "lastUpdated": "2026-09-25T17:39:17.316Z"
+    },
+    {
+      "codename": "emerald",
+      "total": 52,
+      "builds": 6,
+      "lastUpdated": "2026-09-26T00:02:05.707Z"
+    },
+    {
+      "codename": "rosemary",
+      "total": 43,
+      "builds": 24,
+      "lastUpdated": "2026-09-25T14:47:18.656Z"
+    },
+    {
+      "codename": "klee",
+      "total": 39,
+      "builds": 8,
+      "lastUpdated": "2026-09-25T20:10:45.322Z"
+    },
+    {
+      "codename": "dipper",
+      "total": 38,
+      "builds": 4,
+      "lastUpdated": "2026-09-25T14:24:54.622Z"
+    },
+    {
+      "codename": "X00TD",
+      "total": 37,
+      "builds": 8,
+      "lastUpdated": "2026-09-24T08:49:33.639Z"
+    },
+    {
+      "codename": "platina",
+      "total": 33,
+      "builds": 2,
+      "lastUpdated": "2026-09-23T20:26:01.540Z"
+    },
+    {
+      "codename": "fogos",
+      "total": 27,
+      "builds": 19,
+      "lastUpdated": "2026-09-25T16:04:38.628Z"
+    },
+    {
+      "codename": "gale",
+      "total": 26,
+      "builds": 7,
+      "lastUpdated": "2026-09-25T01:46:07.256Z"
+    },
+    {
+      "codename": "Pacman",
+      "total": 21,
+      "builds": 14,
+      "lastUpdated": "2026-09-21T08:47:35.275Z"
+    },
+    {
+      "codename": "surya",
+      "total": 20,
+      "builds": 17,
+      "lastUpdated": "2026-09-25T13:21:57.001Z"
+    },
+    {
+      "codename": "X6837",
+      "total": 18,
+      "builds": 8,
+      "lastUpdated": "2026-09-25T04:53:43.235Z"
+    },
+    {
+      "codename": "guam",
+      "total": 12,
+      "builds": 4,
+      "lastUpdated": "2026-09-25T16:02:03.088Z"
+    },
+    {
+      "codename": "beryl",
+      "total": 11,
+      "builds": 19,
+      "lastUpdated": "2026-09-22T11:04:28.531Z"
+    },
+    {
+      "codename": "a52q",
+      "total": 9,
+      "builds": 12,
+      "lastUpdated": "2026-09-24T22:29:30.500Z"
+    },
+    {
+      "codename": "r8q",
+      "total": 8,
+      "builds": 2,
+      "lastUpdated": "2026-09-22T03:50:09.052Z"
+    },
+    {
+      "codename": "r8s",
+      "total": 8,
+      "builds": 10,
+      "lastUpdated": "2026-09-19T16:55:57.874Z"
+    },
+    {
+      "codename": "a72q",
+      "total": 7,
+      "builds": 15,
+      "lastUpdated": "2026-09-24T16:38:15.053Z"
+    },
+    {
+      "codename": "X1",
+      "total": 6,
+      "builds": 2,
+      "lastUpdated": "2026-09-26T01:01:27.220Z"
+    },
+    {
+      "codename": "m34x",
+      "total": 6,
+      "builds": 22,
+      "lastUpdated": "2026-09-24T17:56:07.340Z"
+    },
+    {
+      "codename": "rodin",
+      "total": 5,
+      "builds": 15,
+      "lastUpdated": "2026-09-25T07:44:53.357Z"
+    },
+    {
+      "codename": "lynx",
+      "total": 5,
+      "builds": 4,
+      "lastUpdated": "2026-09-23T19:09:48.834Z"
+    }
+  ]
+}

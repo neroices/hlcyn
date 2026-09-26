@@ -1,0 +1,335 @@
+---
+import Layout from "../layouts/Layout.astro";
+import cachedData from "../data/downloads.json";
+
+// Pull a very high "top" so we always get the full dataset rather than
+// whatever small default the API applies.
+const API_URL = "https://get.hlcyn.org/api/downloads?top=100000";
+
+type RawEntry = { path: string; count: number; updatedAt: string };
+type DeviceRow = {
+  codename: string;
+  total: number;
+  builds: number;
+  lastUpdated: string;
+};
+
+let devices: DeviceRow[] = [];
+let fetchError: string | null = null;
+let isCached = false;
+
+try {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
+  const res = await fetch(API_URL, { signal: controller.signal });
+  clearTimeout(timeoutId);
+
+  if (!res.ok) throw new Error(`API responded with ${res.status}`);
+  const data = (await res.json()) as { downloads: RawEntry[] };
+  const entries = data.downloads ?? [];
+
+  const byDevice = new Map<string, DeviceRow>();
+
+  for (const entry of entries) {
+    const parts = entry.path.split("/");
+    const filename = parts.at(-1) ?? "";
+
+    if (filename.toLowerCase().endsWith(".img")) continue;
+
+    const codename = parts[2] ?? "unknown";
+
+    const row = byDevice.get(codename) ?? {
+      codename,
+      total: 0,
+      builds: 0,
+      lastUpdated: entry.updatedAt,
+    };
+
+    row.total += entry.count;
+    row.builds += 1;
+    if (new Date(entry.updatedAt) > new Date(row.lastUpdated)) {
+      row.lastUpdated = entry.updatedAt;
+    }
+
+    byDevice.set(codename, row);
+  }
+
+  devices = [...byDevice.values()].sort((a, b) => b.total - a.total);
+
+  // Query get.hlcyn.org for actual official build counts per device
+  await Promise.all(
+    devices.map(async (device) => {
+      try {
+        const buildRes = await fetch(
+          `https://get.hlcyn.org/api/builds?device=${encodeURIComponent(device.codename)}`
+        );
+        if (buildRes.ok) {
+          const buildJson = (await buildRes.json()) as {
+            builds?: { filename?: string; timestamp?: string }[];
+          };
+          const allBuilds = buildJson.builds ?? [];
+          const zipBuilds = allBuilds.filter((b) =>
+            b.filename?.toLowerCase().endsWith(".zip")
+          );
+          const otaOrLegacy = zipBuilds.filter(
+            (b) => !b.filename?.toLowerCase().startsWith("fastboot-")
+          );
+          const actualCount =
+            otaOrLegacy.length > 0 ? otaOrLegacy.length : zipBuilds.length;
+          if (actualCount > 0) {
+            device.builds = actualCount;
+          }
+        }
+      } catch {
+      }
+    })
+  );
+} catch (err) {
+  fetchError = err instanceof Error ? err.message : "Unknown error";
+  if (cachedData?.devices?.length) {
+    devices = cachedData.devices;
+    isCached = true;
+  }
+}
+
+const grandTotal = devices.reduce((sum, d) => sum + d.total, 0);
+const totalBuilds = devices.reduce((sum, d) => sum + d.builds, 0);
+const maxTotal = devices[0]?.total ?? 1;
+const generatedAt = new Date();
+
+function relativeTime(iso: string) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const hours = Math.round(diffMs / 3_600_000);
+  if (hours < 1) return "under an hour ago";
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  return `${days}d ago`;
+}
+---
+
+<Layout title="Halcyon Stats">
+  <!-- Hero Section -->
+  <section class="pb-12 pt-8 md:pb-16 md:pt-14">
+    <h1
+      class="font-[var(--font-display)] text-5xl sm:text-7xl md:text-8xl font-black leading-[0.95] tracking-tight"
+      style="font-variation-settings: 'wght' 900, 'wdth' 100;"
+    >
+      <i>h.</i><br />Stats
+    </h1>
+    
+    <!-- Stat Highlights -->
+    <div class="mt-10 grid gap-4 grid-cols-1 sm:grid-cols-3">
+      <div
+        class="card-lift theme-transition rounded-[var(--radius-xl)] bg-[var(--color-primary-container)] p-6 text-[var(--color-on-primary-container)]"
+      >
+        <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider opacity-80">
+          <span>Downloads</span>
+          <span class="rounded-full bg-black/10 dark:bg-white/20 px-2 py-0.5 text-[10px]">All time</span>
+        </div>
+        <p class="mt-3 font-mono text-3xl sm:text-4xl font-black">{grandTotal.toLocaleString()}</p>
+        <p class="mt-1 text-xs opacity-75 font-mono">packages</p>
+      </div>
+
+      <div
+        class="card-lift theme-transition rounded-[var(--radius-xl)] bg-[var(--color-tertiary-container)] p-6 text-[var(--color-ink)]"
+      >
+        <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider opacity-80">
+          <span>Devices</span>
+          <span class="rounded-full bg-black/10 dark:bg-white/20 px-2 py-0.5 text-[10px]">Tracked</span>
+        </div>
+        <p class="mt-3 font-mono text-3xl sm:text-4xl font-black">{devices.length}</p>
+        <p class="mt-1 text-xs opacity-75 font-mono">unique codenames</p>
+      </div>
+
+      <div
+        class="card-lift theme-transition rounded-[var(--radius-xl)] bg-[var(--color-quaternary-container)] p-6 text-[var(--color-ink)]"
+      >
+        <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-wider opacity-80">
+          <span>Builds</span>
+          <span class="rounded-full bg-black/10 dark:bg-white/20 px-2 py-0.5 text-[10px]">OTA / Fastboot</span>
+        </div>
+        <p class="mt-3 font-mono text-3xl sm:text-4xl font-black">{totalBuilds.toLocaleString()}</p>
+        <p class="mt-1 text-xs opacity-75 font-mono">packages delivered</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Offline Cache Banner or Error / Empty State -->
+  {
+    isCached && (
+      <div class="my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-[var(--radius-lg)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] px-5 py-3 text-xs text-[var(--color-secondary)]">
+        <span>Offline snapshot &middot; live API was unreachable ({fetchError})</span>
+        <span class="font-mono">Cache date: {cachedData.savedAt ? cachedData.savedAt.slice(0, 10) : "archived"}</span>
+      </div>
+    )
+  }
+
+  {
+    fetchError && devices.length === 0 && (
+      <div class="my-8 rounded-[var(--radius-xl)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] p-6 sm:p-8 text-center">
+        <p class="font-medium text-[var(--color-primary)]">Unable to fetch download data</p>
+        <p class="mt-2 text-sm text-[var(--color-secondary)]">
+          {fetchError}. Please try rebuilding the page in a moment.
+        </p>
+      </div>
+    )
+  }
+
+  {
+    !fetchError && devices.length === 0 && (
+      <div class="my-8 rounded-[var(--radius-xl)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] p-6 sm:p-8 text-center text-[var(--color-secondary)]">
+        No installer downloads recorded yet.
+      </div>
+    )
+  }
+
+  <!-- Leaderboard Section -->
+  {
+    devices.length > 0 && (
+      <section class="pb-20">
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[var(--color-surface-dim)] pb-5">
+          <div>
+            <h2 class="font-[var(--font-display)] text-2xl sm:text-3xl font-bold text-[var(--color-ink)]">
+              Device Rankings
+            </h2>
+            <p class="mt-1 text-xs sm:text-sm text-[var(--color-secondary)]">
+              Ranked total downloads counts
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div class="relative w-full sm:w-64">
+              <input
+                id="device-search"
+                type="search"
+                placeholder="Search codename..."
+                class="w-full rounded-full border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] px-4 py-2 text-xs sm:text-sm text-[var(--color-ink)] placeholder-[var(--color-secondary)] transition-colors focus:border-[var(--color-primary)] focus:outline-none"
+              />
+            </div>
+            <span class="shrink-0 rounded-full bg-[var(--color-surface-container)] border border-[var(--color-surface-dim)] px-3 py-1 font-mono text-xs text-[var(--color-secondary)]">
+              <span id="visible-count">{devices.length}</span> / {devices.length}
+            </span>
+          </div>
+        </div>
+
+        <ol id="devices-list" class="space-y-3">
+          {devices.map((device, i) => {
+            const pct = grandTotal > 0 ? ((device.total / grandTotal) * 100).toFixed(1) : "0";
+            const barWidth = Math.max((device.total / maxTotal) * 100, 2);
+
+            let rankClass = "bg-[var(--color-surface-dim)] text-[var(--color-secondary)]";
+            if (i === 0) rankClass = "bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] font-bold";
+            else if (i === 1) rankClass = "bg-[var(--color-tertiary-container)] text-[var(--color-ink)] font-bold";
+            else if (i === 2) rankClass = "bg-[var(--color-quaternary-container)] text-[var(--color-ink)] font-bold";
+
+            return (
+              <li
+                class="device-item card-lift theme-transition group relative block rounded-[var(--radius-xl)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] p-5 sm:p-6 transition-all"
+                data-codename={device.codename.toLowerCase()}
+              >
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div class="flex items-center gap-3.5 min-w-0">
+                    <span
+                      class={`grid h-9 w-9 shrink-0 place-items-center rounded-full font-mono text-xs ${rankClass}`}
+                    >
+                      #{String(i + 1).padStart(2, "0")}
+                    </span>
+
+                    <div class="min-w-0">
+                      <div class="flex items-center gap-2">
+                        <a
+                          href={`https://get.hlcyn.org/builds/${encodeURIComponent(device.codename)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="truncate font-[var(--font-display)] text-lg sm:text-xl font-bold text-[var(--color-ink)] hover:text-[var(--color-primary)] transition-colors"
+                        >
+                          {device.codename}
+                        </a>
+                        <span class="rounded-full bg-[var(--color-surface-dim)] px-2 py-0.5 font-mono text-[10px] text-[var(--color-secondary)]">
+                          {pct}%
+                        </span>
+                      </div>
+                      <p class="font-mono text-xs text-[var(--color-secondary)] mt-0.5">
+                        {device.builds} build{device.builds === 1 ? "" : "s"} listed &middot; last pull {relativeTime(device.lastUpdated)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between sm:justify-end gap-3 self-stretch sm:self-center">
+                    <div class="sm:text-right">
+                      <span class="font-mono text-lg sm:text-xl font-bold text-[var(--color-ink)]">
+                        {device.total.toLocaleString()}
+                      </span>
+                      <span class="hidden sm:block font-mono text-[10px] text-[var(--color-secondary)]">
+                        downloads
+                      </span>
+                    </div>
+
+                    <a
+                      href={`https://get.hlcyn.org/builds/${encodeURIComponent(device.codename)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="btn-lift grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--color-surface-dim)] text-[var(--color-ink)] hover:bg-[var(--color-primary-container)] hover:text-[var(--color-on-primary-container)] transition-colors"
+                      aria-label={`Get downloads for ${device.codename}`}
+                      title={`Open Halcyon downloads for ${device.codename}`}
+                    >
+                      ↗
+                    </a>
+                  </div>
+                </div>
+
+                <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-dim)]">
+                  <div
+                    class="h-full rounded-full transition-all duration-500 ease-out"
+                    style={`width: ${barWidth}%; background: linear-gradient(90deg, var(--color-primary), var(--color-tertiary));`}
+                  />
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+
+        <p id="no-results" class="hidden my-8 rounded-[var(--radius-xl)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] p-8 text-center text-sm text-[var(--color-secondary)]">
+          No devices matched your search.
+        </p>
+
+        <!-- Citation Info -->
+        <div
+          class="mt-12 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)]/50 px-5 py-3 text-xs font-mono text-[var(--color-secondary)]"
+        >
+          <span>© 2026 neroices</span>
+          <span>built {generatedAt.toISOString().replace("T", " ").slice(0, 16)} UTC</span>
+        </div>
+      </section>
+    )
+  }
+</Layout>
+
+<script>
+  function setupSearch() {
+    const searchInput = document.getElementById("device-search") as HTMLInputElement | null;
+    const items = document.querySelectorAll<HTMLLIElement>(".device-item");
+    const visibleCount = document.getElementById("visible-count");
+    const noResults = document.getElementById("no-results");
+
+    if (!searchInput || !items.length) return;
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.toLowerCase().trim();
+      let shown = 0;
+
+      items.forEach((item) => {
+        const codename = item.getAttribute("data-codename") || "";
+        const matches = !query || codename.includes(query);
+        item.style.display = matches ? "" : "none";
+        if (matches) shown++;
+      });
+
+      if (visibleCount) visibleCount.textContent = String(shown);
+      if (noResults) noResults.classList.toggle("hidden", shown > 0);
+    });
+  }
+
+  setupSearch();
+  document.addEventListener("astro:page-load", setupSearch);
+</script>

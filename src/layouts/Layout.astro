@@ -1,0 +1,126 @@
+---
+import { ClientRouter } from "astro:transitions";
+import Nav from "../components/Nav.astro";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = "Halcyon Stats", description = "Halcyon Statistics." } =
+  Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <script is:inline>
+      // set theme + saved theme color before first paint — avoids a flash
+      function applyTheme() {
+        var stored = localStorage.getItem("theme");
+        var prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        var isDark = stored ? stored === "dark" : prefersDark;
+        if (isDark) {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+
+        var hue = localStorage.getItem("theme-hue") || "69";
+        if (hue) {
+          var h = parseInt(hue, 10);
+          function hslToHex(h, s, l) {
+            s /= 100;
+            l /= 100;
+            var k = function (n) {
+              return (n + h / 30) % 12;
+            };
+            var a = s * Math.min(l, 1 - l);
+            var f = function (n) {
+              return (
+                l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)))
+              );
+            };
+            var toHex = function (x) {
+              return Math.round(255 * x)
+                .toString(16)
+                .padStart(2, "0");
+            };
+            return "#" + toHex(f(0)) + toHex(f(8)) + toHex(f(4));
+          }
+          var root = document.documentElement.style;
+          var t = (h + 60) % 360;
+          var q = (h + 140) % 360;
+          var k = (h + 220) % 360;
+          if (isDark) {
+            root.setProperty("--color-primary", hslToHex(h, 70, 80));
+            root.setProperty("--color-primary-container", hslToHex(h, 35, 30));
+            root.setProperty(
+              "--color-on-primary-container",
+              hslToHex(h, 60, 90),
+            );
+            root.setProperty("--color-secondary", hslToHex(h, 15, 80));
+            root.setProperty(
+              "--color-secondary-container",
+              hslToHex(h, 15, 30),
+            );
+            root.setProperty("--color-tertiary", hslToHex(t, 45, 82));
+            root.setProperty("--color-tertiary-container", hslToHex(t, 30, 30));
+            root.setProperty("--color-quaternary", hslToHex(q, 45, 80));
+            root.setProperty(
+              "--color-quaternary-container",
+              hslToHex(q, 30, 28),
+            );
+            root.setProperty("--color-quinary", hslToHex(k, 55, 80));
+            root.setProperty("--color-quinary-container", hslToHex(k, 35, 28));
+          } else {
+            root.setProperty("--color-primary", hslToHex(h, 45, 40));
+            root.setProperty("--color-primary-container", hslToHex(h, 65, 88));
+            root.setProperty(
+              "--color-on-primary-container",
+              hslToHex(h, 50, 20),
+            );
+            root.setProperty("--color-secondary", hslToHex(h, 15, 40));
+            root.setProperty(
+              "--color-secondary-container",
+              hslToHex(h, 25, 90),
+            );
+            root.setProperty("--color-tertiary", hslToHex(t, 35, 42));
+            root.setProperty("--color-tertiary-container", hslToHex(t, 55, 88));
+            root.setProperty("--color-quaternary", hslToHex(q, 40, 38));
+            root.setProperty(
+              "--color-quaternary-container",
+              hslToHex(q, 55, 88),
+            );
+            root.setProperty("--color-quinary", hslToHex(k, 45, 40));
+            root.setProperty("--color-quinary-container", hslToHex(k, 60, 88));
+          }
+        }
+      }
+
+      applyTheme();
+      document.addEventListener("astro:after-swap", applyTheme);
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght,wdth@8..144,400..1000,25..151&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <ClientRouter />
+  </head>
+  <body class="min-h-screen">
+    <Nav />
+    <main class="mx-auto max-w-5xl px-6 sm:px-8 pt-20 sm:pt-24 md:px-12">
+      <slot />
+    </main>
+  </body>
+</html>

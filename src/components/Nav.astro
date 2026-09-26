@@ -1,0 +1,325 @@
+---
+const links = [
+  {
+    href: "/",
+    label: "h.",
+    icon: `<path d="M3 9.5 12 3l9 6.5" /><path d="M5 9.5V21h14V9.5" /><path d="M9 21v-6h6v6" />`,
+  },
+  {
+    href: "https://get.hlcyn.org",
+    label: "Get Halcyon",
+    external: true,
+    icon: `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />`,
+  },
+  {
+    href: "https://github.com/halcyonproject",
+    label: "GitHub",
+    external: true,
+    icon: `<path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />`,
+  },
+  {
+    href: "https://neroices.github.io",
+    label: "~/",
+    external: true,
+    icon: `<circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" />`,
+  },
+];
+---
+
+<div
+  class="fixed top-3 sm:top-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-1.5 sm:gap-3 max-w-[calc(100vw-2rem)] px-1"
+>
+  <nav
+    id="site-nav"
+    class="no-scrollbar overflow-x-auto rounded-[var(--radius-full)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)]/90 px-1.5 py-1.5 sm:px-2 sm:py-2 shadow-lg shadow-black/5 backdrop-blur"
+  >
+    <div class="relative flex items-center gap-0.5 sm:gap-1">
+      <div
+        id="nav-indicator"
+        class="pointer-events-none absolute inset-y-0 rounded-[var(--radius-full)] bg-[var(--color-primary-container)] transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]"
+      >
+      </div>
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            data-path={link.href}
+            aria-label={link.label}
+            target={link.external ? "_blank" : undefined}
+            rel={link.external ? "noopener noreferrer" : undefined}
+            class="relative z-10 flex items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-3 py-3 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-[var(--color-secondary)] transition-colors hover:text-[var(--color-ink)]"
+          >
+            {link.label === "h." ? (
+              <span class="font-bold italic font-mono text-sm sm:text-base tracking-tight px-0.5">
+                h.
+              </span>
+            ) : (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="h-[22px] w-[22px] shrink-0 sm:hidden"
+                  set:html={link.icon}
+                />
+                <span class="hidden sm:inline">{link.label}</span>
+              </>
+            )}
+            {link.external && (
+              <span class="hidden sm:inline-block text-[10px] opacity-60">
+                ↗
+              </span>
+            )}
+          </a>
+        ))
+      }
+    </div>
+  </nav>
+
+  <div class="relative shrink-0">
+    <button
+      id="color-trigger"
+      aria-label="Change theme color"
+      class="cursor-pointer grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)]/90 shadow-lg shadow-black/5 backdrop-blur transition-colors"
+    >
+      <span
+        id="color-swatch"
+        class="h-[18px] w-[18px] sm:h-5 sm:w-5 rounded-full"
+        style="background: var(--color-primary)"></span>
+    </button>
+
+    <div
+      id="color-panel"
+      class="theme-transition pointer-events-none absolute right-[-2.5rem] sm:right-0 top-11 sm:top-14 w-64 sm:w-72 max-w-[calc(100vw-2rem)] origin-top-right scale-95 rounded-[var(--radius-xl)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] p-4 sm:p-5 opacity-0 shadow-xl transition-all duration-200"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="h-4 w-1.5 rounded-full bg-[var(--color-primary)]"></span>
+          <p class="text-xs sm:text-sm font-semibold">Theme Color</p>
+        </div>
+        <span
+          id="hue-value"
+          class="rounded-md bg-[var(--color-primary-container)] px-2 py-0.5 text-xs font-medium text-[var(--color-on-primary-container)]"
+        >
+          69
+        </span>
+      </div>
+      <input
+        id="hue-slider"
+        class="hue-slider mt-4"
+        type="range"
+        min="0"
+        max="360"
+        value="69"
+      />
+    </div>
+  </div>
+
+  <button
+    id="theme-toggle"
+    aria-label="Toggle dark mode"
+    class="cursor-pointer grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)]/90 text-[var(--color-ink)] shadow-lg shadow-black/5 backdrop-blur transition-colors"
+  >
+    <svg
+      id="icon-sun"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      class="hidden h-[18px] w-[18px] sm:h-5 sm:w-5 dark:block"
+    >
+      <circle cx="12" cy="12" r="4"></circle>
+      <path
+        d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+      ></path>
+    </svg>
+    <svg
+      id="icon-moon"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      class="block h-[18px] w-[18px] sm:h-5 sm:w-5 dark:hidden"
+    >
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
+    </svg>
+  </button>
+</div>
+
+<script>
+  function hslToHex(h: number, s: number, l: number) {
+    s /= 100;
+    l /= 100;
+    const k = (n: number) => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n: number) =>
+      l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+    const toHex = (x: number) =>
+      Math.round(255 * x)
+        .toString(16)
+        .padStart(2, "0");
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+  }
+
+  function applyThemeColor(hue: number, persist = true) {
+    const isDark = document.documentElement.classList.contains("dark");
+    const root = document.documentElement.style;
+    const t = (hue + 60) % 360;
+    const q = (hue + 140) % 360;
+    const k = (hue + 220) % 360;
+
+    if (isDark) {
+      root.setProperty("--color-primary", hslToHex(hue, 70, 80));
+      root.setProperty("--color-primary-container", hslToHex(hue, 35, 30));
+      root.setProperty("--color-on-primary-container", hslToHex(hue, 60, 90));
+      root.setProperty("--color-secondary", hslToHex(hue, 15, 80));
+      root.setProperty("--color-secondary-container", hslToHex(hue, 15, 30));
+      root.setProperty("--color-tertiary", hslToHex(t, 45, 82));
+      root.setProperty("--color-tertiary-container", hslToHex(t, 30, 30));
+      root.setProperty("--color-quaternary", hslToHex(q, 45, 80));
+      root.setProperty("--color-quaternary-container", hslToHex(q, 30, 28));
+      root.setProperty("--color-quinary", hslToHex(k, 55, 80));
+      root.setProperty("--color-quinary-container", hslToHex(k, 35, 28));
+    } else {
+      root.setProperty("--color-primary", hslToHex(hue, 45, 40));
+      root.setProperty("--color-primary-container", hslToHex(hue, 65, 88));
+      root.setProperty("--color-on-primary-container", hslToHex(hue, 50, 20));
+      root.setProperty("--color-secondary", hslToHex(hue, 15, 40));
+      root.setProperty("--color-secondary-container", hslToHex(hue, 25, 90));
+      root.setProperty("--color-tertiary", hslToHex(t, 35, 42));
+      root.setProperty("--color-tertiary-container", hslToHex(t, 55, 88));
+      root.setProperty("--color-quaternary", hslToHex(q, 40, 38));
+      root.setProperty("--color-quaternary-container", hslToHex(q, 55, 88));
+      root.setProperty("--color-quinary", hslToHex(k, 45, 40));
+      root.setProperty("--color-quinary-container", hslToHex(k, 60, 88));
+    }
+
+    const badge = document.getElementById("hue-value");
+    if (badge) badge.textContent = String(hue);
+    const swatch = document.getElementById("color-swatch");
+    if (swatch) swatch.style.background = "var(--color-primary)";
+    const slider = document.getElementById(
+      "hue-slider",
+    ) as HTMLInputElement | null;
+    if (slider) slider.value = String(hue);
+
+    if (persist) localStorage.setItem("theme-hue", String(hue));
+  }
+
+  function normalize(p: string) {
+    return p.replace(/\/+$/, "") || "/";
+  }
+
+  function updateNavIndicator() {
+    const nav = document.getElementById("site-nav");
+    const indicator = document.getElementById("nav-indicator");
+    if (!nav || !indicator) return;
+
+    const pathname = normalize(window.location.pathname);
+    const anchors = nav.querySelectorAll<HTMLAnchorElement>("a[data-path]");
+    let active: HTMLAnchorElement | null = null;
+
+    for (const a of anchors) {
+      const linkPath = a.getAttribute("data-path") || "";
+      const isInternal = linkPath.startsWith("/");
+      const on = isInternal && normalize(linkPath) === pathname;
+      if (on) active = a;
+      a.classList.toggle("text-[var(--color-on-primary-container)]", on);
+      a.classList.toggle("text-[var(--color-secondary)]", !on);
+    }
+
+    if (active) {
+      indicator.style.width = `${active.offsetWidth}px`;
+      indicator.style.left = `${active.offsetLeft}px`;
+      const navRect = nav.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      if (activeRect.left < navRect.left || activeRect.right > navRect.right) {
+        active.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    } else {
+      indicator.style.width = "0px";
+    }
+  }
+
+  function closeColorPanel() {
+    const panel = document.getElementById("color-panel");
+    if (!panel) return;
+    panel.classList.add("pointer-events-none", "scale-95", "opacity-0");
+  }
+
+  function openColorPanel() {
+    const panel = document.getElementById("color-panel");
+    if (!panel) return;
+    panel.classList.remove("pointer-events-none", "scale-95", "opacity-0");
+  }
+
+  function syncThemeUI() {
+    const hue = localStorage.getItem("theme-hue");
+    const h = hue ? parseInt(hue, 10) : 69;
+    const badge = document.getElementById("hue-value");
+    if (badge) badge.textContent = String(h);
+    const swatch = document.getElementById("color-swatch");
+    if (swatch) swatch.style.background = "var(--color-primary)";
+    const slider = document.getElementById(
+      "hue-slider",
+    ) as HTMLInputElement | null;
+    if (slider) slider.value = String(h);
+  }
+
+  function handleResize() {
+    updateNavIndicator();
+  }
+
+  updateNavIndicator();
+  syncThemeUI();
+  document.addEventListener("astro:page-load", () => {
+    updateNavIndicator();
+    syncThemeUI();
+  });
+  window.addEventListener("resize", handleResize);
+
+  document.addEventListener("input", (e) => {
+    const target = e.target as HTMLElement;
+    if (target && target.id === "hue-slider") {
+      applyThemeColor(Number((target as HTMLInputElement).value));
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+
+    if (target.closest("#theme-toggle")) {
+      document.documentElement.classList.toggle("dark");
+      localStorage.setItem(
+        "theme",
+        document.documentElement.classList.contains("dark") ? "dark" : "light",
+      );
+      const hue = localStorage.getItem("theme-hue");
+      applyThemeColor(hue ? parseInt(hue, 10) : 69, false);
+      return;
+    }
+
+    if (target.closest("#color-trigger")) {
+      const panel = document.getElementById("color-panel");
+      const isOpen = panel && !panel.classList.contains("opacity-0");
+      isOpen ? closeColorPanel() : openColorPanel();
+      return;
+    }
+
+    if (!target.closest("#color-panel")) {
+      closeColorPanel();
+    }
+  });
+</script>

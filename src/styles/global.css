@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Material-expressive tonal palette */
+  --color-primary: #4f378b;
+  --color-primary-container: #eaddff;
+  --color-on-primary-container: #21005d;
+
+  --color-secondary: #625b71;
+  --color-secondary-container: #e8def8;
+
+  --color-tertiary: #7d5260;
+  --color-tertiary-container: #ffd8e4;
+
+  --color-quaternary: #326960;
+  --color-quaternary-container: #b8eee3;
+
+  --color-quinary: #7a5832;
+  --color-quinary-container: #feddbb;
+
+  --color-surface: #fef7ff;
+  --color-surface-dim: #e6e0e9;
+  --color-surface-container: #f3edf7;
+
+  --color-outline: #79747e;
+  --color-ink: #1d1b20;
+
+  --color-chip-ink: #1d1b20;
+
+  --font-display: "Roboto Flex", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+
+  /* Material 3 shape scale */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+}
+
+/* dark tonal palette — swapped in when <html> has .dark */
+.dark {
+  --color-primary: #d0bcff;
+  --color-primary-container: #4f378b;
+  --color-on-primary-container: #eaddff;
+
+  --color-secondary: #cbc2db;
+  --color-secondary-container: #4a4458;
+
+  --color-tertiary: #efb8c8;
+  --color-tertiary-container: #633b48;
+
+  --color-quaternary: #9cd5ca;
+  --color-quaternary-container: #174f46;
+
+  --color-quinary: #efbe94;
+  --color-quinary-container: #5f3e1b;
+
+  --color-surface: #141218;
+  --color-surface-dim: #221f27;
+  --color-surface-container: #211f26;
+
+  --color-outline: #948f99;
+  --color-ink: #e6e0e9;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+body,
+nav,
+footer,
+.theme-transition {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.card-lift {
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    rotate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    translate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+.card-lift:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-lift {
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    rotate 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    scale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    translate 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s ease;
+}
+
+.btn-lift:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.spring {
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    rotate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    scale 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    translate 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.25s ease;
+}
+
+input[type="range"].hue-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 12px;
+  width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(to right,
+      hsl(0, 85%, 65%),
+      hsl(60, 85%, 65%),
+      hsl(120, 80%, 60%),
+      hsl(180, 75%, 55%),
+      hsl(240, 80%, 65%),
+      hsl(300, 80%, 65%),
+      hsl(360, 85%, 65%));
+}
+
+input[type="range"].hue-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 22px;
+  width: 22px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  margin-top: 0;
+}
+
+input[type="range"].hue-slider::-moz-range-thumb {
+  height: 22px;
+  width: 22px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.35s;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
