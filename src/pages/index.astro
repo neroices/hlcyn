@@ -276,11 +276,11 @@ function relativeTime(iso: string) {
                   </div>
 
                   <div class="flex items-center justify-between sm:justify-end gap-3 self-stretch sm:self-center">
-                    <div class="sm:text-right">
+                    <div class="flex items-baseline gap-1.5 sm:block sm:text-right">
                       <span class="font-mono text-lg sm:text-xl font-bold text-[var(--color-ink)]">
                         {device.total.toLocaleString()}
                       </span>
-                      <span class="hidden sm:block font-mono text-[10px] text-[var(--color-secondary)]">
+                      <span class="font-mono text-[10px] text-[var(--color-secondary)]">
                         downloads
                       </span>
                     </div>
@@ -317,10 +317,7 @@ function relativeTime(iso: string) {
         <div
           class="mt-12 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)]/50 px-5 py-3 text-xs font-mono text-[var(--color-secondary)]"
         >
-          <div class="flex items-center gap-3">
-            <span>© 2026 neroices</span>
-            <span>&middot;</span>
-          </div>
+          <span>© 2026 neroices</span>
           <span>built {generatedAt.toISOString().replace("T", " ").slice(0, 16)} UTC</span>
         </div>
       </section>
