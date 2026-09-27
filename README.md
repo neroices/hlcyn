@@ -1,6 +1,12 @@
 # halcyonstats
 
-Download statistics dashboard and API for the Halcyon Project. Built with Astro SSR and hosted on Cloudflare Pages.
+Download statistics dashboard and API for the Halcyon Project. Built with Astro SSR, Tailwind CSS v4, and hosted on Cloudflare Pages.
+
+## Features
+
+- **Search & Filtering**: Real-time client-side search across both device marketing names and codenames.
+- **Dynamic Theming**: Material You expressive tonal palette with interactive hue slider and dark/light mode toggle.
+- **Resilient Caching**: Multi-tier caching with Cloudflare KV, in-memory cache, live API fallback, and static snapshot fallback.
 
 ## How it works
 

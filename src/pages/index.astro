@@ -1,12 +1,19 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import AwardBadge from "../components/AwardBadge.astro";
 import { getDownloadsData } from "../lib/downloads";
+import deviceNames from "../data/devices.json";
 
 const data = await getDownloadsData();
 const { devices, grandTotal, totalBuilds, isCached, savedAt, fetchError } = data;
 
 const maxTotal = devices[0]?.total ?? 1;
 const generatedAt = new Date();
+
+const deviceMap = deviceNames as Record<string, string>;
+function getDeviceName(codename: string): string {
+  return deviceMap[codename] || deviceMap[codename.toLowerCase()] || codename;
+}
 
 function relativeTime(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -113,7 +120,7 @@ function relativeTime(iso: string) {
               <input
                 id="device-search"
                 type="search"
-                placeholder="Search codename..."
+                placeholder="Search device or codename..."
                 class="w-full rounded-full border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] px-4 py-2 text-xs sm:text-sm text-[var(--color-ink)] placeholder-[var(--color-secondary)] transition-colors focus:border-[var(--color-primary)] focus:outline-none"
               />
             </div>
@@ -127,41 +134,66 @@ function relativeTime(iso: string) {
           {devices.map((device, i) => {
             const pct = grandTotal > 0 ? ((device.total / grandTotal) * 100).toFixed(1) : "0";
             const barWidth = Math.max((device.total / maxTotal) * 100, 2);
+            const deviceName = getDeviceName(device.codename);
 
-            let rankClass = "bg-[var(--color-surface-dim)] text-[var(--color-secondary)]";
-            if (i === 0) rankClass = "bg-[var(--color-primary-container)] text-[var(--color-on-primary-container)] font-bold";
-            else if (i === 1) rankClass = "bg-[var(--color-tertiary-container)] text-[var(--color-ink)] font-bold";
-            else if (i === 2) rankClass = "bg-[var(--color-quaternary-container)] text-[var(--color-ink)] font-bold";
+            let cardBg = "bg-[var(--color-surface-container)]";
+            let cardBorder = "border-[var(--color-surface-dim)]";
+            let progressGradient = "linear-gradient(90deg, var(--color-primary), var(--color-tertiary))";
+            let codenameBadgeStyle = "bg-[var(--color-secondary-container)] text-[var(--color-secondary)] border border-[var(--color-secondary)]/30";
+
+            if (i === 0) {
+              cardBg = "bg-amber-500/15 dark:bg-amber-500/20";
+              cardBorder = "border-amber-500/50 dark:border-amber-400/50 shadow-md shadow-amber-500/10";
+              progressGradient = "linear-gradient(90deg, #f59e0b, #fbbf24)";
+              codenameBadgeStyle = "bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/40";
+            } else if (i === 1) {
+              cardBg = "bg-slate-400/15 dark:bg-slate-400/20";
+              cardBorder = "border-slate-400/50 dark:border-slate-400/50 shadow-md shadow-slate-500/10";
+              progressGradient = "linear-gradient(90deg, #94a3b8, #cbd5e1)";
+              codenameBadgeStyle = "bg-slate-400/25 text-slate-800 dark:text-slate-200 border border-slate-400/40";
+            } else if (i === 2) {
+              cardBg = "bg-orange-500/15 dark:bg-orange-500/20";
+              cardBorder = "border-orange-500/50 dark:border-orange-500/50 shadow-md shadow-orange-500/10";
+              progressGradient = "linear-gradient(90deg, #c2410c, #ea580c)";
+              codenameBadgeStyle = "bg-orange-500/20 text-orange-800 dark:text-orange-200 border border-orange-500/40";
+            }
 
             return (
               <li
-                class="device-item card-lift theme-transition group relative block rounded-[var(--radius-xl)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] p-5 sm:p-6 transition-all"
+                class={`device-item card-lift theme-transition group relative block rounded-[var(--radius-xl)] border ${cardBorder} ${cardBg} p-5 sm:p-6 transition-all`}
                 data-codename={device.codename.toLowerCase()}
+                data-name={deviceName.toLowerCase()}
               >
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div class="flex items-center gap-3.5 min-w-0">
-                    <span
-                      class={`grid h-9 w-9 shrink-0 place-items-center rounded-full font-mono text-xs ${rankClass}`}
-                    >
-                      #{String(i + 1).padStart(2, "0")}
-                    </span>
+                    {i === 0 || i === 1 || i === 2 ? (
+                      <AwardBadge rank={(i + 1) as 1 | 2 | 3} />
+                    ) : (
+                      <div
+                        class="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--color-quinary)]/30 bg-[var(--color-quinary-container)] text-[var(--color-quinary)] font-[var(--font-display)] text-sm sm:text-base font-black shadow-xs select-none"
+                        aria-label={`Rank ${i + 1}`}
+                      >
+                        {i + 1}
+                      </div>
+                    )}
 
                     <div class="min-w-0">
-                      <div class="flex items-center gap-2">
+                      <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                         <a
                           href={`https://get.hlcyn.org/builds/${encodeURIComponent(device.codename)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           class="truncate font-[var(--font-display)] text-lg sm:text-xl font-bold text-[var(--color-ink)] hover:text-[var(--color-primary)] transition-colors"
+                          title={`Halcyon for ${deviceName} (${device.codename})`}
                         >
-                          {device.codename}
+                          {deviceName}
                         </a>
-                        <span class="rounded-full bg-[var(--color-surface-dim)] px-2 py-0.5 font-mono text-[10px] text-[var(--color-secondary)]">
-                          {pct}%
+                        <span class={`rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold shrink-0 ${codenameBadgeStyle}`}>
+                          {device.codename}
                         </span>
                       </div>
                       <p class="font-mono text-xs text-[var(--color-secondary)] mt-0.5">
-                        {device.builds} build{device.builds === 1 ? "" : "s"} listed &middot; last pull {relativeTime(device.lastUpdated)}
+                        {device.builds} build{device.builds === 1 ? "" : "s"} &middot; {pct}% of downloads &middot; last pull {relativeTime(device.lastUpdated)}
                       </p>
                     </div>
                   </div>
@@ -182,7 +214,7 @@ function relativeTime(iso: string) {
                       rel="noopener noreferrer"
                       class="btn-lift grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--color-surface-dim)] text-[var(--color-ink)] hover:bg-[var(--color-primary-container)] hover:text-[var(--color-on-primary-container)] transition-colors"
                       aria-label={`Get downloads for ${device.codename}`}
-                      title={`Open Halcyon downloads for ${device.codename}`}
+                      title={`Open Halcyon downloads for ${deviceName} (${device.codename})`}
                     >
                       ↗
                     </a>
@@ -192,7 +224,7 @@ function relativeTime(iso: string) {
                 <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-dim)]">
                   <div
                     class="h-full rounded-full transition-all duration-500 ease-out"
-                    style={`width: ${barWidth}%; background: linear-gradient(90deg, var(--color-primary), var(--color-tertiary));`}
+                    style={`width: ${barWidth}%; background: ${progressGradient};`}
                   />
                 </div>
               </li>
@@ -231,7 +263,8 @@ function relativeTime(iso: string) {
 
       items.forEach((item) => {
         const codename = item.getAttribute("data-codename") || "";
-        const matches = !query || codename.includes(query);
+        const name = item.getAttribute("data-name") || "";
+        const matches = !query || codename.includes(query) || name.includes(query);
         item.style.display = matches ? "" : "none";
         if (matches) shown++;
       });
