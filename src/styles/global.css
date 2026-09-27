@@ -232,6 +232,12 @@ input[type="range"].hue-slider::-moz-range-thumb {
   }
 }
 
+/* Progress bar fill transition */
+.progress-bar-fill {
+  transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: width;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::view-transition-old(root),
@@ -247,5 +253,9 @@ input[type="range"].hue-slider::-moz-range-thumb {
   .marquee-container.is-marquee {
     mask-image: none !important;
     -webkit-mask-image: none !important;
+  }
+
+  .progress-bar-fill {
+    transition: none !important;
   }
 }

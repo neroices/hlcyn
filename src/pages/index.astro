@@ -43,7 +43,7 @@ function relativeTime(iso: string) {
           <span>Downloads</span>
           <span class="rounded-full bg-black/10 dark:bg-white/20 px-2 py-0.5 text-[10px]">All time</span>
         </div>
-        <p class="mt-3 font-mono text-3xl sm:text-4xl font-black">{grandTotal.toLocaleString()}</p>
+        <p class="count-up mt-3 font-mono text-3xl sm:text-4xl font-black" data-target={grandTotal}>{grandTotal.toLocaleString()}</p>
         <p class="mt-1 text-xs opacity-75 font-mono">packages</p>
       </div>
 
@@ -54,7 +54,7 @@ function relativeTime(iso: string) {
           <span>Devices</span>
           <span class="rounded-full bg-black/10 dark:bg-white/20 px-2 py-0.5 text-[10px]">Tracked</span>
         </div>
-        <p class="mt-3 font-mono text-3xl sm:text-4xl font-black">{devices.length}</p>
+        <p class="count-up mt-3 font-mono text-3xl sm:text-4xl font-black" data-target={devices.length}>{devices.length}</p>
         <p class="mt-1 text-xs opacity-75 font-mono">unique codenames</p>
       </div>
 
@@ -65,7 +65,7 @@ function relativeTime(iso: string) {
           <span>Builds</span>
           <span class="rounded-full bg-black/10 dark:bg-white/20 px-2 py-0.5 text-[10px]">OTA / Fastboot</span>
         </div>
-        <p class="mt-3 font-mono text-3xl sm:text-4xl font-black">{totalBuilds.toLocaleString()}</p>
+        <p class="count-up mt-3 font-mono text-3xl sm:text-4xl font-black" data-target={totalBuilds}>{totalBuilds.toLocaleString()}</p>
         <p class="mt-1 text-xs opacity-75 font-mono">packages delivered</p>
       </div>
     </div>
@@ -201,7 +201,10 @@ function relativeTime(iso: string) {
 
                   <div class="flex items-center justify-between sm:justify-end gap-3 self-stretch sm:self-center">
                     <div class="flex items-baseline gap-1.5 sm:block sm:text-right">
-                      <span class="font-mono text-lg sm:text-xl font-bold text-[var(--color-ink)]">
+                      <span
+                        class="count-up font-mono text-lg sm:text-xl font-bold text-[var(--color-ink)]"
+                        data-target={device.total}
+                      >
                         {device.total.toLocaleString()}
                       </span>
                       <span class="font-mono text-[10px] text-[var(--color-secondary)]">
@@ -224,8 +227,9 @@ function relativeTime(iso: string) {
 
                 <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-dim)]">
                   <div
-                    class="h-full rounded-full transition-all duration-500 ease-out"
-                    style={`width: ${barWidth}%; background: ${progressGradient};`}
+                    class="progress-bar-fill h-full rounded-full"
+                    data-width={`${barWidth}%`}
+                    style={`width: 0%; background: ${progressGradient};`}
                   />
                 </div>
               </li>
@@ -297,6 +301,92 @@ function relativeTime(iso: string) {
     }
   }
 
+  function animateCountUp(el: HTMLElement, target: number, duration = 1200) {
+    const startTime = performance.now();
+    el.textContent = "0";
+
+    function step(currentTime: number) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Smooth ease-out cubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const val = Math.round(target * ease);
+      el.textContent = val.toLocaleString();
+
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = target.toLocaleString();
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  function setupAnimations() {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // 1. Progress bars
+    const progressBars = document.querySelectorAll<HTMLElement>(".progress-bar-fill");
+    if (progressBars.length) {
+      if (prefersReducedMotion || typeof IntersectionObserver === "undefined") {
+        progressBars.forEach((bar) => {
+          bar.style.width = bar.getAttribute("data-width") || "0%";
+        });
+      } else {
+        const barObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const bar = entry.target as HTMLElement;
+                const targetWidth = bar.getAttribute("data-width") || "0%";
+                requestAnimationFrame(() => {
+                  bar.style.width = targetWidth;
+                });
+                barObserver.unobserve(bar);
+              }
+            });
+          },
+          { threshold: 0.05, rootMargin: "60px" }
+        );
+        progressBars.forEach((bar) => {
+          bar.style.width = "0%";
+          barObserver.observe(bar);
+        });
+      }
+    }
+
+    // 2. Count-up effect on numbers
+    const countElements = document.querySelectorAll<HTMLElement>(".count-up");
+    if (countElements.length) {
+      if (prefersReducedMotion || typeof IntersectionObserver === "undefined") {
+        countElements.forEach((el) => {
+          const target = parseInt(el.getAttribute("data-target") || "0", 10);
+          if (!isNaN(target)) el.textContent = target.toLocaleString();
+        });
+      } else {
+        const countObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const el = entry.target as HTMLElement;
+                const target = parseInt(el.getAttribute("data-target") || "0", 10);
+                if (!isNaN(target)) {
+                  animateCountUp(el, target, 1100);
+                }
+                countObserver.unobserve(el);
+              }
+            });
+          },
+          { threshold: 0.05, rootMargin: "60px" }
+        );
+        countElements.forEach((el) => {
+          countObserver.observe(el);
+        });
+      }
+    }
+  }
+
   function setupSearch() {
     const searchInput = document.getElementById("device-search") as HTMLInputElement | null;
     const items = document.querySelectorAll<HTMLLIElement>(".device-item");
@@ -328,6 +418,7 @@ function relativeTime(iso: string) {
   function init() {
     setupSearch();
     setupMarquee();
+    setupAnimations();
   }
 
   init();
