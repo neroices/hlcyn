@@ -164,7 +164,7 @@ function relativeTime(iso: string) {
                 data-name={deviceName.toLowerCase()}
               >
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div class="flex items-center gap-3.5 min-w-0">
+                  <div class="flex items-center gap-3.5 min-w-0 flex-1">
                     {i === 0 || i === 1 || i === 2 ? (
                       <AwardBadge rank={(i + 1) as 1 | 2 | 3} />
                     ) : (
@@ -176,17 +176,19 @@ function relativeTime(iso: string) {
                       </div>
                     )}
 
-                    <div class="min-w-0">
-                      <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                        <a
-                          href={`https://get.hlcyn.org/builds/${encodeURIComponent(device.codename)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="truncate font-[var(--font-display)] text-lg sm:text-xl font-bold text-[var(--color-ink)] hover:text-[var(--color-primary)] transition-colors"
-                          title={`Halcyon for ${deviceName} (${device.codename})`}
-                        >
-                          {deviceName}
-                        </a>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap min-w-0">
+                        <div class="marquee-container min-w-0 max-w-full">
+                          <a
+                            href={`https://get.hlcyn.org/builds/${encodeURIComponent(device.codename)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="marquee-content font-[var(--font-display)] text-lg sm:text-xl font-bold text-[var(--color-ink)] hover:text-[var(--color-primary)] transition-colors"
+                            title={`Halcyon for ${deviceName} (${device.codename})`}
+                          >
+                            {deviceName}
+                          </a>
+                        </div>
                         <span class={`rounded-full px-2.5 py-0.5 font-mono text-[11px] font-semibold shrink-0 ${codenameBadgeStyle}`}>
                           {device.codename}
                         </span>
@@ -248,6 +250,53 @@ function relativeTime(iso: string) {
 </Layout>
 
 <script>
+  let updateMarquees: (() => void) | null = null;
+
+  function setupMarquee() {
+    const containers = document.querySelectorAll<HTMLElement>(".marquee-container");
+    if (!containers.length) return;
+
+    function checkMarquees() {
+      containers.forEach((el) => {
+        if (el.offsetParent === null) return;
+        const content = el.querySelector<HTMLElement>(".marquee-content");
+        if (!content) return;
+
+        const prevAnim = content.style.animation;
+        content.style.animation = "none";
+        const overflow = content.scrollWidth - el.clientWidth;
+        content.style.animation = prevAnim;
+
+        if (overflow > 4) {
+          el.classList.add("is-marquee");
+          el.style.setProperty("--marquee-overflow", `${Math.ceil(overflow)}px`);
+          const duration = Math.max(5, Math.round(overflow / 22) + 3);
+          el.style.setProperty("--marquee-duration", `${duration}s`);
+        } else {
+          el.classList.remove("is-marquee");
+          el.style.removeProperty("--marquee-overflow");
+          el.style.removeProperty("--marquee-duration");
+        }
+      });
+    }
+
+    updateMarquees = checkMarquees;
+    checkMarquees();
+
+    if (document.fonts) {
+      document.fonts.ready.then(checkMarquees);
+    }
+
+    if (typeof ResizeObserver !== "undefined") {
+      const ro = new ResizeObserver(() => {
+        checkMarquees();
+      });
+      containers.forEach((el) => ro.observe(el));
+    } else {
+      window.addEventListener("resize", checkMarquees);
+    }
+  }
+
   function setupSearch() {
     const searchInput = document.getElementById("device-search") as HTMLInputElement | null;
     const items = document.querySelectorAll<HTMLLIElement>(".device-item");
@@ -270,9 +319,17 @@ function relativeTime(iso: string) {
 
       if (visibleCount) visibleCount.textContent = String(shown);
       if (noResults) noResults.classList.toggle("hidden", shown > 0);
+      if (updateMarquees) {
+        requestAnimationFrame(updateMarquees);
+      }
     });
   }
 
-  setupSearch();
-  document.addEventListener("astro:page-load", setupSearch);
+  function init() {
+    setupSearch();
+    setupMarquee();
+  }
+
+  init();
+  document.addEventListener("astro:page-load", init);
 </script>
