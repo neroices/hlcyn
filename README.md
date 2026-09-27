@@ -11,7 +11,7 @@ Download statistics dashboard and API for the Halcyon Project. Built with Astro 
 ## How it works
 
 1. **Scheduled Worker (`worker/`)**: Runs daily on a cron trigger (`0 0 * * *`). It pulls downloads and build stats from `get.hlcyn.org`, caches the payload in Cloudflare KV, and commits `src/data/downloads.json` to the repo via the GitHub API.
-2. **SSR Website (`src/`)**: Renders on Cloudflare Pages. On each request, it checks for fresh cached data in memory or Cloudflare KV. If unavailable, it tries the live API, and falls back to the bundled `downloads.json` snapshot if upstream is down.
+2. **SSR Website (`src/`)**: Renders on Cloudflare Pages. On each request, it serves fresh data from the live API (with a 5-minute in-memory isolate cache to prevent rate-limiting). If the live API is unreachable or times out, it automatically falls back to Cloudflare KV, Edge Cache, and the bundled `downloads.json` snapshot.
 
 ## Development
 

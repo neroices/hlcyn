@@ -49,9 +49,9 @@ const badgeConfig = {
   class={className}
   role="img"
   aria-label={badgeConfig.title}
-  title={badgeConfig.title}
   xmlns="http://www.w3.org/2000/svg"
 >
+  <title>{badgeConfig.title}</title>
   <g transform="translate(0, 512) scale(0.1, -0.1)">
     <!-- Ribbon outer border -->
     <path d={D_RIBBON_TOTAL} fill={badgeConfig.ribbonOuter} />

@@ -18,7 +18,7 @@ export interface DownloadsData {
 }
 
 const API_URL = "https://get.hlcyn.org/api/downloads?top=100000";
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour in-memory cache
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes in-memory cache
 const CACHE_URL = "https://halcyonstats.internal/api/downloads-cache";
 
 let runtimeCache: { data: DownloadsData; timestamp: number } | null = null;
@@ -67,24 +67,6 @@ export async function getDownloadsData(): Promise<DownloadsData> {
   }
 
   const env = await getCloudflareEnv();
-  const kv = env?.DOWNLOADS_BACKUP ?? env?.KV ?? env?.BACKUP_KV;
-
-  // 2. Check if Cloudflare KV has fresh backup data from the scheduled backup worker (< 24h)
-  if (kv?.get) {
-    try {
-      const kvData = (await kv.get("downloads_backup", "json")) as DownloadsData | null;
-      if (kvData && Array.isArray(kvData.devices) && kvData.devices.length > 0) {
-        const ageMs = Date.now() - new Date(kvData.savedAt).getTime();
-        // If KV data is fresh (less than 24 hours old), serve it instantly!
-        if (ageMs < 24 * 60 * 60 * 1000) {
-          runtimeCache = { data: kvData, timestamp: Date.now() };
-          return kvData;
-        }
-      }
-    } catch {
-      // Proceed to live fetch if KV read fails
-    }
-  }
 
   try {
     const res = await fetch(API_URL, {

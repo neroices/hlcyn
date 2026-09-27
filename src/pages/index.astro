@@ -8,7 +8,6 @@ const data = await getDownloadsData();
 const { devices, grandTotal, totalBuilds, isCached, savedAt, fetchError } = data;
 
 const maxTotal = devices[0]?.total ?? 1;
-const generatedAt = new Date();
 
 const deviceMap = deviceNames as Record<string, string>;
 function getDeviceName(codename: string): string {
@@ -241,7 +240,7 @@ function relativeTime(iso: string) {
           class="mt-12 flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)]/50 px-5 py-3 text-xs font-mono text-[var(--color-secondary)]"
         >
           <span>© 2026 neroices</span>
-          <span>built {generatedAt.toISOString().replace("T", " ").slice(0, 16)} UTC</span>
+          <span>last update {savedAt ? savedAt.slice(0, 10) : new Date().toISOString().slice(0, 10)}</span>
         </div>
       </section>
     )
