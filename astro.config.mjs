@@ -1,9 +1,11 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
+import cloudflare from "@astrojs/cloudflare";
 
 export default defineConfig({
-  site: "https://neroices.github.io",
-  base: '/hlcyn',
+  output: "server",
+  adapter: cloudflare(),
+  site: "https://halcyonstats.pages.dev",
   vite: {
     plugins: [tailwindcss()],
   },

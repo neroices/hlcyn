@@ -1,10 +1,9 @@
 import type { APIRoute } from "astro";
-import cachedData from "../../data/downloads.json";
-
-export const prerender = true;
+import { getDownloadsData } from "../../lib/downloads";
 
 export const GET: APIRoute = async () => {
-  return new Response(JSON.stringify(cachedData, null, 2), {
+  const data = await getDownloadsData();
+  return new Response(JSON.stringify(data, null, 2), {
     status: 200,
     headers: {
       "Content-Type": "application/json",

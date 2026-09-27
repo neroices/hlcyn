@@ -1,118 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import cachedData from "../data/downloads.json";
+import { getDownloadsData } from "../lib/downloads";
 
-const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
-
-// Pull a very high "top" so we always get the full dataset rather than
-// whatever small default the API applies.
-const API_URL = "https://get.hlcyn.org/api/downloads?top=100000";
-
-type RawEntry = { path: string; count: number; updatedAt: string };
-type DeviceRow = {
-  codename: string;
-  total: number;
-  builds: number;
-  lastUpdated: string;
-};
-
-let devices: DeviceRow[] = [];
-let fetchError: string | null = null;
-let isCached = false;
-
-try {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
-  const res = await fetch(API_URL, {
-    signal: controller.signal,
-    headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; HalcyonStats/1.0)",
-      Accept: "application/json",
-    },
-  });
-  clearTimeout(timeoutId);
-
-  if (!res.ok) throw new Error(`API responded with ${res.status}`);
-  const data = (await res.json()) as { downloads: RawEntry[] };
-  const entries = data.downloads ?? [];
-
-  if (entries.length === 0 && cachedData?.devices?.length) {
-    throw new Error("Live API returned empty entries");
-  }
-
-  const byDevice = new Map<string, DeviceRow>();
-
-  for (const entry of entries) {
-    const parts = entry.path.split("/");
-    const filename = parts.at(-1) ?? "";
-
-    if (filename.toLowerCase().endsWith(".img")) continue;
-
-    const codename = parts[2] ?? "unknown";
-
-    const row = byDevice.get(codename) ?? {
-      codename,
-      total: 0,
-      builds: 0,
-      lastUpdated: entry.updatedAt,
-    };
-
-    row.total += entry.count;
-    row.builds += 1;
-    if (new Date(entry.updatedAt) > new Date(row.lastUpdated)) {
-      row.lastUpdated = entry.updatedAt;
-    }
-
-    byDevice.set(codename, row);
-  }
-
-  devices = [...byDevice.values()].sort((a, b) => b.total - a.total);
-
-  // Query get.hlcyn.org for actual official build counts per device
-  await Promise.all(
-    devices.map(async (device) => {
-      try {
-        const buildRes = await fetch(
-          `https://get.hlcyn.org/api/builds?device=${encodeURIComponent(device.codename)}`
-        );
-        if (buildRes.ok) {
-          const buildJson = (await buildRes.json()) as {
-            builds?: { filename?: string; timestamp?: string }[];
-          };
-          const allBuilds = buildJson.builds ?? [];
-          const zipBuilds = allBuilds.filter((b) =>
-            b.filename?.toLowerCase().endsWith(".zip")
-          );
-          const otaOrLegacy = zipBuilds.filter(
-            (b) => !b.filename?.toLowerCase().startsWith("fastboot-")
-          );
-          const actualCount =
-            otaOrLegacy.length > 0 ? otaOrLegacy.length : zipBuilds.length;
-          if (actualCount > 0) {
-            device.builds = actualCount;
-          }
-        }
-      } catch {
-      }
-    })
-  );
-} catch (err) {
-  fetchError = err instanceof Error ? err.message : "Unknown error";
-  if (cachedData?.devices?.length) {
-    devices = cachedData.devices;
-    isCached = true;
-  }
-}
-
-const grandTotal =
-  isCached && cachedData?.grandTotal
-    ? cachedData.grandTotal
-    : devices.reduce((sum, d) => sum + d.total, 0);
-
-const totalBuilds =
-  isCached && cachedData?.totalBuilds
-    ? cachedData.totalBuilds
-    : devices.reduce((sum, d) => sum + d.builds, 0);
+const data = await getDownloadsData();
+const { devices, grandTotal, totalBuilds, isCached, savedAt, fetchError } = data;
 
 const maxTotal = devices[0]?.total ?? 1;
 const generatedAt = new Date();
@@ -178,8 +69,8 @@ function relativeTime(iso: string) {
   {
     isCached && (
       <div class="my-6 flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-[var(--radius-lg)] border border-[var(--color-surface-dim)] bg-[var(--color-surface-container)] px-5 py-3 text-xs text-[var(--color-secondary)]">
-        <span>Data synced from get.hlcyn.org API</span>
-        <span class="font-mono">Sync date: {cachedData.savedAt ? cachedData.savedAt.slice(0, 10) : "recent"}</span>
+        <span>Data loaded from backup cache (API timeout / unavailable)</span>
+        <span class="font-mono">Sync date: {savedAt ? savedAt.slice(0, 10) : "recent"}</span>
       </div>
     )
   }

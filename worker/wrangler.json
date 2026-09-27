@@ -1,0 +1,16 @@
+{
+  "name": "halcyonstats-backup-worker",
+  "main": "src/index.js",
+  "compatibility_date": "2024-09-01",
+  "triggers": {
+    "crons": [
+      "0 0 * * *"
+    ]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "DOWNLOADS_BACKUP",
+      "id": "bdcf16c1ad9f4dc693a37bc053b52ff9"
+    }
+  ]
+}

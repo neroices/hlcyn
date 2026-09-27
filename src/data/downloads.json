@@ -1,92 +1,98 @@
 {
-  "savedAt": "2026-09-26T02:07:59.281Z",
+  "savedAt": "2026-09-27T11:29:47.012Z",
   "source": "https://get.hlcyn.org/api/downloads",
-  "grandTotal": 684,
-  "totalBuilds": 279,
+  "grandTotal": 1272,
+  "totalBuilds": 266,
   "devices": [
     {
-      "codename": "lime",
-      "total": 101,
-      "builds": 12,
-      "lastUpdated": "2026-09-25T19:45:02.111Z"
-    },
-    {
       "codename": "tanzanite",
-      "total": 89,
+      "total": 198,
       "builds": 29,
-      "lastUpdated": "2026-09-25T19:52:18.004Z"
+      "lastUpdated": "2026-09-27T07:17:03.480Z"
     },
     {
-      "codename": "citrus",
-      "total": 63,
-      "builds": 16,
-      "lastUpdated": "2026-09-25T17:39:17.316Z"
+      "codename": "lime",
+      "total": 148,
+      "builds": 12,
+      "lastUpdated": "2026-09-27T10:31:19.337Z"
     },
     {
       "codename": "emerald",
-      "total": 52,
+      "total": 110,
       "builds": 6,
-      "lastUpdated": "2026-09-26T00:02:05.707Z"
-    },
-    {
-      "codename": "rosemary",
-      "total": 43,
-      "builds": 24,
-      "lastUpdated": "2026-09-25T14:47:18.656Z"
-    },
-    {
-      "codename": "klee",
-      "total": 39,
-      "builds": 8,
-      "lastUpdated": "2026-09-25T20:10:45.322Z"
+      "lastUpdated": "2026-09-27T09:11:53.005Z"
     },
     {
       "codename": "dipper",
-      "total": 38,
+      "total": 107,
       "builds": 4,
-      "lastUpdated": "2026-09-25T14:24:54.622Z"
+      "lastUpdated": "2026-09-27T09:05:38.299Z"
+    },
+    {
+      "codename": "Pacman",
+      "total": 81,
+      "builds": 14,
+      "lastUpdated": "2026-09-27T10:54:14.730Z"
+    },
+    {
+      "codename": "citrus",
+      "total": 79,
+      "builds": 16,
+      "lastUpdated": "2026-09-26T22:31:33.513Z"
+    },
+    {
+      "codename": "rodin",
+      "total": 74,
+      "builds": 17,
+      "lastUpdated": "2026-09-27T10:28:23.070Z"
+    },
+    {
+      "codename": "rosemary",
+      "total": 70,
+      "builds": 24,
+      "lastUpdated": "2026-09-27T08:21:34.912Z"
     },
     {
       "codename": "X00TD",
-      "total": 37,
+      "total": 69,
       "builds": 8,
-      "lastUpdated": "2026-09-24T08:49:33.639Z"
+      "lastUpdated": "2026-09-27T11:23:21.763Z"
     },
     {
       "codename": "platina",
-      "total": 33,
+      "total": 68,
       "builds": 2,
-      "lastUpdated": "2026-09-23T20:26:01.540Z"
+      "lastUpdated": "2026-09-23T20:26:10.320Z"
+    },
+    {
+      "codename": "klee",
+      "total": 68,
+      "builds": 8,
+      "lastUpdated": "2026-09-26T12:02:46.903Z"
+    },
+    {
+      "codename": "gale",
+      "total": 51,
+      "builds": 7,
+      "lastUpdated": "2026-09-27T01:31:33.817Z"
     },
     {
       "codename": "fogos",
-      "total": 27,
+      "total": 33,
       "builds": 19,
       "lastUpdated": "2026-09-25T16:04:38.628Z"
     },
     {
-      "codename": "gale",
-      "total": 26,
-      "builds": 7,
-      "lastUpdated": "2026-09-25T01:46:07.256Z"
-    },
-    {
-      "codename": "Pacman",
-      "total": 21,
-      "builds": 14,
-      "lastUpdated": "2026-09-21T08:47:35.275Z"
+      "codename": "X6837",
+      "total": 27,
+      "builds": 8,
+      "lastUpdated": "2026-09-26T18:55:14.079Z"
     },
     {
       "codename": "surya",
-      "total": 20,
+      "total": 22,
       "builds": 17,
-      "lastUpdated": "2026-09-25T13:21:57.001Z"
-    },
-    {
-      "codename": "X6837",
-      "total": 18,
-      "builds": 8,
-      "lastUpdated": "2026-09-25T04:53:43.235Z"
+      "lastUpdated": "2026-09-26T07:55:33.066Z"
     },
     {
       "codename": "guam",
@@ -103,7 +109,7 @@
     {
       "codename": "a52q",
       "total": 9,
-      "builds": 12,
+      "builds": 1,
       "lastUpdated": "2026-09-24T22:29:30.500Z"
     },
     {
@@ -135,18 +141,6 @@
       "total": 6,
       "builds": 22,
       "lastUpdated": "2026-09-24T17:56:07.340Z"
-    },
-    {
-      "codename": "rodin",
-      "total": 5,
-      "builds": 15,
-      "lastUpdated": "2026-09-25T07:44:53.357Z"
-    },
-    {
-      "codename": "lynx",
-      "total": 5,
-      "builds": 4,
-      "lastUpdated": "2026-09-23T19:09:48.834Z"
     }
   ]
 }

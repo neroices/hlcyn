@@ -1,15 +1,14 @@
 import type { APIRoute } from "astro";
-import cachedData from "../../data/downloads.json";
-
-export const prerender = true;
+import { getDownloadsData } from "../../lib/downloads";
 
 export const GET: APIRoute = async () => {
+  const data = await getDownloadsData();
   const summary = {
-    savedAt: cachedData.savedAt,
-    grandTotal: cachedData.grandTotal,
-    totalBuilds: cachedData.totalBuilds,
-    deviceCount: cachedData.devices?.length ?? 0,
-    topDevice: cachedData.devices?.[0] ?? null,
+    savedAt: data.savedAt,
+    grandTotal: data.grandTotal,
+    totalBuilds: data.totalBuilds,
+    deviceCount: data.devices?.length ?? 0,
+    topDevice: data.devices?.[0] ?? null,
   };
 
   return new Response(JSON.stringify(summary, null, 2), {
